@@ -30,6 +30,42 @@ contract CDBC is ERC20 {
         _transfer(controllingParty, newControllingParty, balanceOf(contorllingParty));
     }
 
+
+    function updateInterestRate(uint newInterestRateBasisPoints) external {
+        require(msg.sender == controllingParty, "Not Conrolling Party");
+        uint oldInterestRatesBasisPoint = interestRateBasisPoints;
+        interestRateBasisPoints = newInteresetBasisPoints;
+        emit UpdateInterestRate(oldInterestRateBasisPoint, newInterestRateBasisPoints);
+    }
+
+    function increaseMoneySupply(uint, inflationAmount) external {
+        require(msg.sender == controllingParty," not controlling party");
+        uint oldMoneySupply = totalSupply();
+        _mint(msg.sender, inflationAmount);
+        emit increaseMoneySupply(oldMoneySupply, inflationAmount);
+
+    }
+
+    function stakeTreasuryBonds(uint amount) external {
+        require( amount > 0, "amount is <=0");
+        require(balanceOf(msg.sender)>= amount, "balance is amount");
+        _transfer(msg.sender,address(this), amount);
+        if(stakeTreasuryBond[msg.sender]>0) ClaimTreasuryBonds();
+        stakedFromTS[msg.sender] = blcok.timestamp;
+        stakedTreasuryBond[msg.sender] += amount;
+        emit StakeTreasuryBonds(msg.sender, amount);
+    }
+
+    function UnstakeTreasuryBonds(uint amount) external {
+        require(amount > 0, "amount is = 0")
+        require(stskedTreasuryBond)
+    }
+
+    function ClaimTreasuryBonds() public{
+
+    }
+
+
     
 
 }
