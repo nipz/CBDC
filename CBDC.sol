@@ -25,9 +25,10 @@ contract CDBC is ERC20 {
     }
 
     function updateControllingParty(address newControllingParty) external {
-        require(msg.sender == controllingParty," not controlling party");
+        require(msg.sender == controllingParty, "Not Nontrolling Party");
         controllingParty = newControllingParty;
         _transfer(controllingParty, newControllingParty, balanceOf(contorllingParty));
+        emit UpdateControllingParty(msg.sender, newControllingParty);
     }
 
 
@@ -39,11 +40,17 @@ contract CDBC is ERC20 {
     }
 
     function increaseMoneySupply(uint, inflationAmount) external {
-        require(msg.sender == controllingParty," not controlling party");
+        require(msg.sender == controllingParty, "Not Controlling Party");
         uint oldMoneySupply = totalSupply();
         _mint(msg.sender, inflationAmount);
         emit increaseMoneySupply(oldMoneySupply, inflationAmount);
 
+    }
+
+    function updateBlacklist(address Criminal, bool blacklisted) external {
+        require(msg.sender == controllingParty, "Not Conrolling Party");
+        blacklist[criminal = blacklisted];
+        emit UpdateBlacklist(criminal, blacklisted);
     }
 
     function stakeTreasuryBonds(uint amount) external {
@@ -58,14 +65,27 @@ contract CDBC is ERC20 {
 
     function UnstakeTreasuryBonds(uint amount) external {
         require(amount > 0, "amount is = 0")
-        require(stskedTreasuryBond)
+        require(stakedTreasuryBond[msg.sender] >= amount , "amount is > staked");
+        claimTreasuryBonds();
+        stakeTreasuryBond[msg.sender] -= amount;
+        _transfer(address(this), msg.sender, amount);
+        emit UnstakeTreasuryBonds(msg.sender, amount);
     }
 
-    function ClaimTreasuryBonds() public{
+    function ClaimTreasuryBonds() public {
+        require(stakedTreasuryBond[msg.sender] >= amount, "staked is <= 0");
+        uint secondsStaked = block.timestamp - stakedFromTS[msg.sender];
+        uint rewards = stakedTreasuryBond[msg.sender] * secondedStaked * interestRateBasisPoints / (10000 * 3.154e7);
+        stakedFromTS[msg.sender] = block.timestamp;
+        _mint(msg.sender, rewards);
+        emit ClaimTreasuryBonds(msg.sender, rewards);
 
     }
 
-
-    
+    function _transfer(address from, address to, uint amount) internal virtual override {
+        require(blacklist[from] == false, "sender address is blacklisted");
+        require(blacklist[to] == false, "sender address is blacklisted");
+        super._transfer(from, to , amount); 
+    }
 
 }
